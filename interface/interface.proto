@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package template;
+option go_package = "https://github.com/ingridkarinaf/ActiveReplicationTemplate;template";
+
+service Service {
+    rpc Update (UpdateRequest) returns (UpdateReply) {}
+    rpc Retrieve (RetrieveRequest) returns (RetrieveReply) {}
+}
+
+message UpdateRequest {
+    int32 id = 1; //Replace for appropriate data type 
+    int32 value = 2; //Replace for appropriate data type 
+}
+
+message UpdateReply {
+    bool outcome = 1;
+}
+
+message RetrieveRequest {
+    int32 id = 1;
+}
+
+message RetrieveReply {
+    int32 value = 2;
+}
