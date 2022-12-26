@@ -84,13 +84,13 @@ func (FE *FEServer) DialToServer(port string) (*grpc.ClientConn) {
 }
 
 //Waits only for two success responses, chucks out the last one (for performance, only a bonus if the last one is successful)
-func (FE *FEServer) Put(ctx context.Context, hashUpt *service.PutRequest) (*service.PutResponse, error){
+func (FE *FEServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) (*service.UpdateReply, error){
 
 	resultChannel := make(chan bool, 2)
 	for port, RMconnection := range FE.replicaManagers  {
 		
 		go func(rmPort string, connection service.ServiceClient) {
-			_, err := connection.Put(context.Background(), hashUpt) //does context.background make it async?
+			_, err := connection.Update(context.Background(), hashUpt) //does context.background make it async?
 			if err != nil {
 				log.Printf("FE Server: Hash table to RM server update failed for FE server %s: %s", rmPort, FE.port, err) //identify which replica server?
 			} else {
@@ -103,17 +103,17 @@ func (FE *FEServer) Put(ctx context.Context, hashUpt *service.PutRequest) (*serv
 	<-resultChannel
 	<-resultChannel 
 
-	serviceUpdateOutcome := &service.PutResponse{
-		Success: true,
+	serviceUpdateOutcome := &service.UpdateReply{
+		Outcome: true,
 	}
 	return serviceUpdateOutcome, nil
 }
 
-func (FE *FEServer) Get(ctx context.Context, getRsqt *service.GetRequest) (*service.GetResponse, error) {
-	responseChannel := make(chan *service.GetResponse, 2)
+func (FE *FEServer) Retrieve(ctx context.Context, getRsqt *service.RetrieveRequest) (*service.RetrieveReply, error) {
+	responseChannel := make(chan *service.RetrieveReply, 2)
 	for port, RMconnection := range FE.replicaManagers  {
 		go func(rmPort string, connection service.ServiceClient) {
-			result, err := connection.Get(context.Background(), getRsqt) 
+			result, err := connection.Retrieve(context.Background(), getRsqt) 
 			if err != nil {
 				log.Printf("Hash table update to RM server %s failed in FE server %s: %s", rmPort, FE.port, err)
 				delete(FE.replicaManagers, rmPort)

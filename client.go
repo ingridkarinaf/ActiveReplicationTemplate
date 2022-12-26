@@ -3,8 +3,6 @@ package main
 import (
 	service "github.com/ingridkarinaf/ActiveReplicationTemplate/interface"
 	grpc "google.golang.org/grpc"
-	"strings"
-	"strconv"
 	"log"
 	"os"
 	"bufio"
@@ -52,9 +50,9 @@ func main() {
 			if (textChoice == "increment") {
 				serviceUpdate := &service.UpdateRequest{}
 
-				result := Incerement(serviceUpdate)
-				if result.Success == true {
-					log.Printf("Hashtable successfully updated to %v for key %v.\n", key, value)
+				result := Update(serviceUpdate)
+				if result.Outcome == true {
+					log.Printf("Hashtable successfully updated to %v for key %v.\n")
 				} else {
 					log.Println("Update unsuccessful, please try again.")
 				}
@@ -63,9 +61,9 @@ func main() {
 				
 				getReq := &service.RetrieveRequest{}
 
-				result := Get(getReq) 
-				log.Printf("Client: Value of key %s: %v \n",text, int(result))
-				fmt.Printf("Value of key %s: %v \n",text, int(result))
+				result := Retrieve(getReq) 
+				log.Printf("Client: Value of key %s: %v \n", int(result))
+				fmt.Printf("Value of key %s: %v \n", int(result))
 			} else {
 				log.Println("Sorry, didn't catch that. ")
 				fmt.Println("Sorry, didn't catch that. ")
@@ -77,22 +75,22 @@ func main() {
 }
 
 //If function returns an error, redial to other front-end and try again
-func Update(hashUpt *service.PutRequest) (*service.PutResponse) {
-	result, err := server.Put(context.Background(), hashUpt) //What does the context.background do?
+func Update(hashUpt *service.UpdateRequest) (*service.UpdateReply) {
+	result, err := server.Update(context.Background(), hashUpt) //What does the context.background do?
 	if err != nil {
 		log.Printf("Client %s hashUpdate failed:%s. \n Redialing and retrying. \n", connection.Target(), err)
 		Redial()
-		return Put(hashUpt)
+		return Update(hashUpt)
 	}
 	return result
 }
 
-func Retrieve(getRsqt *service.GetRequest) (int32) {
-	result, err := server.Get(context.Background(), getRsqt)
+func Retrieve(getRsqt *service.RetrieveRequest) (int32) {
+	result, err := server.Retrieve(context.Background(), getRsqt)
 	if err != nil {
 		log.Printf("Client %s get request failed: %s", connection.Target(), err)
 		Redial()
-		return Get(getRsqt)
+		return Retrieve(getRsqt)
 	}
 
 	if reflect.ValueOf(result.Value).Kind() != reflect.ValueOf(int32(5)).Kind() {

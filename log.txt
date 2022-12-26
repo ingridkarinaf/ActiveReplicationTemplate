@@ -1,0 +1,14 @@
+2022/12/26 15:18:08 FEServer 4000: Server on port 4000: Listening at [::]:4000
+2022/12/26 15:18:08 FE server 4000: Trying to dial RM server with port: :5000
+2022/12/26 15:18:08 FEServer _attempting_ to listen on port 4000 
+2022/12/26 15:18:08 FE server 4000: Trying to dial RM server with port: :5001
+2022/12/26 15:18:08 FE server 4000: Trying to dial RM server with port: :5002
+2022/12/26 15:18:26 FEServer 4001: Server on port 4001: Listening at [::]:4001
+2022/12/26 15:18:26 FE server 4001: Trying to dial RM server with port: :5000
+2022/12/26 15:18:26 FEServer _attempting_ to listen on port 4001 
+2022/12/26 15:18:26 FE server 4001: Trying to dial RM server with port: :5001
+2022/12/26 15:18:26 FE server 4001: Trying to dial RM server with port: :5002
+2022/12/26 15:21:11 Hashtable successfully updated to %!v(MISSING) for key %!v(MISSING).
+2022/12/26 15:21:33 Client: Value of key %!s(int=1): %!v(MISSING) 
+2022/12/26 15:21:47 Hashtable successfully updated to %!v(MISSING) for key %!v(MISSING).
+2022/12/26 15:21:48 Client: Value of key %!s(int=2): %!v(MISSING) 

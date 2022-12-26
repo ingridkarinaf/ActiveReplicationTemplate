@@ -21,6 +21,7 @@ type RMServer struct {
 	id              int32 //portnumber, between 5000 and 5002
 	ctx             context.Context
 	data   			int32 //Update
+	lockChannel 	chan bool
 }
 
 func main() {
@@ -36,7 +37,11 @@ func main() {
 		id:              int32(portInput),
 		data:   		0, //update
 		ctx:             ctx,
+		lockChannel: 	make(chan bool, 1),
 	}
+
+	//Unlock channel
+	rmServer.lockChannel <- true
 
 	list, err := net.Listen("tcp", fmt.Sprintf(":%v", portInput))
 	if err != nil {
@@ -54,19 +59,29 @@ func main() {
 	for {}
 }
 
-func (RM *RMServer) Put(ctx context.Context, hashUpt *service.PutRequest) (*service.PutResponse, error){
-	RM.hashTableCopy[hashUpt.Key] = hashUpt.Value
-	returnMessage := &service.PutResponse{
-		Success: true,
+func (RM *RMServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) (*service.UpdateReply, error){
+	<- RM.lockChannel 
+	time.Sleep(5 * time.Second)
+	//update this whole function
+	returnMessage := &service.UpdateReply{
+		currentValue: int32(RM.data),
 	}
+	fmt.Println("RM data: ", RM.data)
+	RM.data++
+	fmt.Println("RM data: ", RM.data)
+	returnMessage := &service.UpdateReply{
+		currentValue: int32(RM.data),
+	}
+	RM.lockChannel <- true
 	return returnMessage, nil
 }
 
 
-func (RM *RMServer) Get(ctx context.Context, getRqst *service.GetRequest) (*service.GetResponse, error) {
-	hashValue := RM.hashTableCopy[getRqst.Key]
-	getResp := &service.GetResponse{
-		Value:  hashValue,
+func (RM *RMServer) Retrieve(ctx context.Context, getRqst *service.RetrieveRequest) (*service.RetrieveReply, error) {
+	//update this whole function
+	value := RM.data
+	getResp := &service.RetrieveReply{
+		Value:  value,
 	}
 	return getResp, nil
 }

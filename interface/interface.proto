@@ -15,6 +15,7 @@ message UpdateRequest {
 
 message UpdateReply {
     bool outcome = 1;
+    int32 currentValue = 2;
 }
 
 message RetrieveRequest {
