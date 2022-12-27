@@ -75,7 +75,7 @@ func main() {
 func (FE *FEServer) DialToServer(port string) (*grpc.ClientConn) {
 	log.Printf("FE server %v: Trying to dial RM server with port: %v\n", FE.port, port)
 	conn, err := grpc.Dial(port, grpc.WithInsecure(), grpc.WithBlock()) //This is going to wait until it receives the connection
-	if err != nil { //Reconsider error handling
+	if err != nil { 
 		log.Fatalf("FEServer %s could not connect to RM server with port: %s", FE.port, port, err)
 	}
 	
@@ -105,13 +105,10 @@ func (FE *FEServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) 
 	val2 := <-resultChannel 
 	fmt.Println("val1: ", val1, "val2:", val2)
 	
-	// if val1.CurrentValue != val2.CurrentValue {
-	// 	val3 := <- resultChannel
-	// 	serviceUpdateOutcome := &service.UpdateReply{
-	// 		Outcome: true,
-	// 		CurrentValue: val3.CurrentValue,
-	// 	}
-	// }
+	if val1.CurrentValue != val2.CurrentValue {
+		val3 := <- resultChannel
+		return val3, nil
+	}
 	return val1, nil
 }
 

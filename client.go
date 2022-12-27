@@ -9,6 +9,7 @@ import (
 	"context"
 	"reflect"
 	"fmt"
+	"strings"
 )
 
 /* 
@@ -23,6 +24,7 @@ Limitations:
 
 var server service.ServiceClient
 var connection *grpc.ClientConn 
+var reconnects int
 
 func main() {
 
@@ -77,7 +79,7 @@ func main() {
 
 //If function returns an error, redial to other front-end and try again
 func Update(hashUpt *service.UpdateRequest) (*service.UpdateReply) {
-	result, err := server.Update(context.Background(), hashUpt) //What does the context.background do?
+	result, err := server.Update(context.Background(), hashUpt)
 	if err != nil {
 		log.Printf("Client %s hashUpdate failed:%s. \n Redialing and retrying. \n", connection.Target(), err)
 		Redial()
@@ -89,7 +91,11 @@ func Update(hashUpt *service.UpdateRequest) (*service.UpdateReply) {
 func Retrieve(getRsqt *service.RetrieveRequest) (int32) {
 	result, err := server.Retrieve(context.Background(), getRsqt)
 	if err != nil {
+		fmt.Printf("Client %s get request failed: %s", connection.Target(), err) 
 		log.Printf("Client %s get request failed: %s", connection.Target(), err)
+		if reconnects > 0 {
+			return 0
+		}
 		Redial()
 		return Retrieve(getRsqt)
 	}
@@ -100,17 +106,20 @@ func Retrieve(getRsqt *service.RetrieveRequest) (int32) {
 	return result.Value
 }
 
-//In the case of losing connection - alternates between predefined front-
+//In the case of losing connection - alternates between predefined front-ends
 func Redial() {
+	reconnects++
 	var port string
-	if connection.Target()[len(connection.Target())-1:] == "1" {
+	lastPortDigit := strings.TrimLeft(connection.Target()[len(connection.Target())-1:], "\t")
+	if lastPortDigit == "1" {
 		port =  ":4000"
 	} else {
 		port = ":4001"
 	}
 
-	conn, err := grpc.Dial(port, grpc.WithInsecure())
+	conn, err := grpc.Dial(port, grpc.WithInsecure(), grpc.WithReturnConnectionError())
 	if err != nil {
+		fmt.Printf("Client: Unable to connect to port %s: %v", port, err)
 		log.Fatalf("Client: Unable to connect to port %s: %v", port, err)
 	}
 
