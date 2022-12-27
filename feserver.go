@@ -8,6 +8,7 @@ import (
 	"strconv"
 	service "github.com/ingridkarinaf/ActiveReplicationTemplate/interface"
 	grpc "google.golang.org/grpc"
+	"fmt"
 )
 
 /* 
@@ -86,27 +87,32 @@ func (FE *FEServer) DialToServer(port string) (*grpc.ClientConn) {
 //Waits only for two success responses, chucks out the last one (for performance, only a bonus if the last one is successful)
 func (FE *FEServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) (*service.UpdateReply, error){
 
-	resultChannel := make(chan bool, 2)
+	resultChannel := make(chan *service.UpdateReply, 2)
 	for port, RMconnection := range FE.replicaManagers  {
 		
 		go func(rmPort string, connection service.ServiceClient) {
-			_, err := connection.Update(context.Background(), hashUpt) //does context.background make it async?
+			result, err := connection.Update(context.Background(), hashUpt) //does context.background make it async?
 			if err != nil {
 				log.Printf("FE Server: Hash table to RM server update failed for FE server %s: %s", rmPort, FE.port, err) //identify which replica server?
 			} else {
-				resultChannel <- true
+				resultChannel <- result
 			}
 		}(port, RMconnection)
 	}
 	
 	// Should wait until received two values
-	<-resultChannel
-	<-resultChannel 
-
-	serviceUpdateOutcome := &service.UpdateReply{
-		Outcome: true,
-	}
-	return serviceUpdateOutcome, nil
+	val1 := <-resultChannel
+	val2 := <-resultChannel 
+	fmt.Println("val1: ", val1, "val2:", val2)
+	
+	// if val1.CurrentValue != val2.CurrentValue {
+	// 	val3 := <- resultChannel
+	// 	serviceUpdateOutcome := &service.UpdateReply{
+	// 		Outcome: true,
+	// 		CurrentValue: val3.CurrentValue,
+	// 	}
+	// }
+	return val1, nil
 }
 
 func (FE *FEServer) Retrieve(ctx context.Context, getRsqt *service.RetrieveRequest) (*service.RetrieveReply, error) {

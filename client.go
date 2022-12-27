@@ -52,7 +52,8 @@ func main() {
 
 				result := Update(serviceUpdate)
 				if result.Outcome == true {
-					log.Printf("Hashtable successfully updated to %v for key %v.\n")
+					fmt.Printf("Value successfully incremented to %v\n", result.CurrentValue)
+					log.Printf("Value successfully incremented to %v\n", result.CurrentValue)
 				} else {
 					log.Println("Update unsuccessful, please try again.")
 				}
@@ -62,8 +63,8 @@ func main() {
 				getReq := &service.RetrieveRequest{}
 
 				result := Retrieve(getReq) 
-				log.Printf("Client: Value of key %s: %v \n", int(result))
-				fmt.Printf("Value of key %s: %v \n", int(result))
+				log.Printf("Client: Value: %v \n", int(result))
+				fmt.Printf("Value: %v \n", int(result))
 			} else {
 				log.Println("Sorry, didn't catch that. ")
 				fmt.Println("Sorry, didn't catch that. ")

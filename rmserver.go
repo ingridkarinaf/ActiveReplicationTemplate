@@ -9,6 +9,7 @@ import (
 	"context"
 	"net"
 	"log"
+	"time"
 )
 
 /*
@@ -63,15 +64,14 @@ func (RM *RMServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) 
 	<- RM.lockChannel 
 	time.Sleep(5 * time.Second)
 	//update this whole function
+	//update: depending on requirements, update data before saving to message
 	returnMessage := &service.UpdateReply{
-		currentValue: int32(RM.data),
+		CurrentValue: int32(RM.data),
+		Outcome: true,
 	}
 	fmt.Println("RM data: ", RM.data)
 	RM.data++
 	fmt.Println("RM data: ", RM.data)
-	returnMessage := &service.UpdateReply{
-		currentValue: int32(RM.data),
-	}
 	RM.lockChannel <- true
 	return returnMessage, nil
 }
