@@ -13,5 +13,3 @@ Run the following in separate terminals:
 `go run feserver.go 4001`
 `go run client.go 4000`
 `go run client.go 4001`
-
-See activeRep.png for visual represntation of client-server archiceture.

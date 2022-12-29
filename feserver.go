@@ -9,6 +9,8 @@ import (
 	service "github.com/ingridkarinaf/ActiveReplicationTemplate/interface"
 	grpc "google.golang.org/grpc"
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 /* 
@@ -86,7 +88,11 @@ func (FE *FEServer) DialToServer(port string) (*grpc.ClientConn) {
 
 //Waits only for two success responses, chucks out the last one (for performance, only a bonus if the last one is successful)
 func (FE *FEServer) Update(ctx context.Context, hashUpt *service.UpdateRequest) (*service.UpdateReply, error){
-
+	
+	fmt.Println("update inside FE server, update: ", hashUpt.Id, hashUpt.Value)
+	waitTime := rand.Intn(10 - 0) + 0
+	fmt.Printf("waiting for %v seconds.", waitTime)
+	time.Sleep(time.Duration(waitTime) * time.Second)
 	resultChannel := make(chan *service.UpdateReply, 2)
 	for port, RMconnection := range FE.replicaManagers  {
 		
